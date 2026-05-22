@@ -20,6 +20,8 @@ def search(query_text: str, top_k: int = 20) -> list[SearchResult]:
 
     results = []
     for i, hit in enumerate(hits):
+        if hit["score"] < 0.25:
+            continue
         payload = hit["payload"]
         video_id = payload.get("video_id", "")
         timestamp = payload.get("timestamp_seconds", 0.0)
