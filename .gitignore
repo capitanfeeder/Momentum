@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environment
+.venv/
+venv/
+ENV/
+
+# Knowledge graph index
+.codebase-memory/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Storage (generated data)
+backend/storage/uploads/*
+backend/storage/frames/*
+backend/storage/thumbnails/*
+backend/storage/clips/*
+backend/storage/metadata/*
+!backend/storage/uploads/.gitkeep
+!backend/storage/frames/.gitkeep
+!backend/storage/thumbnails/.gitkeep
+!backend/storage/clips/.gitkeep
+!backend/storage/metadata/.gitkeep
+
+# Models (downloaded at runtime)
+*.pt
+*.pth
+*.onnx
+
+# Environment variables
+.env
+.env.local
+
+# Logs
+*.log
+
+# Node
+node_modules/
+frontend/dist/
+
+# Qdrant data
+qdrant/storage/
