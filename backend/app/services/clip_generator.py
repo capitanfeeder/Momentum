@@ -16,6 +16,11 @@ def extract_clip_thumbnail(
     video_id: str,
     clip_idx: int,
 ) -> str | None:
+    """Grab a single frame from the video at a specific timestamp.
+
+    Used to generate preview thumbnails for search results. Returns
+    the relative path to the saved clip image, or None on failure.
+    """
     video_path = Path(video_path)
 
     from app.utils.paths import get_clips_dir
@@ -28,6 +33,7 @@ def extract_clip_thumbnail(
         logger.error("Cannot open video for clip extraction: %s", video_path)
         return None
 
+    # seek to the right frame
     fps = cap.get(cv2.CAP_PROP_FPS)
     frame_number = int(timestamp * fps) if fps > 0 else 0
     cap.set(cv2.CAP_PROP_POS_FRAMES, frame_number)
@@ -42,6 +48,7 @@ def extract_clip_thumbnail(
     clip_filename = f"clip_{clip_idx:06d}.jpg"
     clip_file = clips_dir / clip_filename
 
+    # resize to 640px wide for the preview — keeps file sizes small
     h, w = frame.shape[:2]
     preview_w = 640
     preview_h = int(h * (preview_w / w)) if w > 0 else 360

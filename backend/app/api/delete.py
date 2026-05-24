@@ -16,17 +16,24 @@ router = APIRouter(prefix="/api", tags=["videos"])
 
 @router.delete("/videos")
 async def delete_all_videos():
+    """Nuke everything — all videos, frames, embeddings, metadata.
+
+    Used by the CLEAR ALL button in the header. Tries its best even
+    if some parts fail (e.g. qdrant is down but files still get deleted).
+    """
     videos = list_all_videos()
     deleted_vectors = 0
     deleted_videos = 0
     errors = []
 
+    # wipe qdrant first
     try:
         deleted_vectors = delete_all_vectors()
     except Exception as e:
         logger.warning("Failed to delete Qdrant vectors: %s", e)
         errors.append(f"Qdrant: {e}")
 
+    # then clean up all the storage directories
     for directory in [
         settings.UPLOADS_DIR,
         settings.FRAMES_DIR,

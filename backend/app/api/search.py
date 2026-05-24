@@ -14,6 +14,7 @@ router = APIRouter(prefix="/api", tags=["search"])
 
 @router.post("/search")
 async def semantic_search_endpoint(request: SearchRequest):
+    """Take a text query and return the most relevant video frames."""
     query = request.query.strip()
     if not query:
         raise HTTPException(status_code=400, detail="Query cannot be empty")

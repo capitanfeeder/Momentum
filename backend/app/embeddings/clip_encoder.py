@@ -51,6 +51,7 @@ def _load_model():
 
 
 def encode_image(image_path: Path | str, device: Optional[str] = None) -> np.ndarray:
+    """Turn an image frame into a CLIP vector."""
     model, _ = _load_model()
     device = device or _get_device()
 
@@ -59,12 +60,14 @@ def encode_image(image_path: Path | str, device: Optional[str] = None) -> np.nda
 
     with torch.no_grad():
         features = model.encode_image(img_tensor)
+        # normalize so cosine similarity works properly
         features = features / features.norm(dim=-1, keepdim=True)
 
     return features.cpu().numpy().flatten().astype(np.float32)
 
 
 def encode_text(text: str, device: Optional[str] = None) -> np.ndarray:
+    """Turn a text query into a CLIP vector."""
     model, tokenizer = _load_model()
     device = device or _get_device()
 
@@ -72,6 +75,7 @@ def encode_text(text: str, device: Optional[str] = None) -> np.ndarray:
 
     with torch.no_grad():
         features = model.encode_text(tokens)
+        # normalize so cosine similarity works properly
         features = features / features.norm(dim=-1, keepdim=True)
 
     return features.cpu().numpy().flatten().astype(np.float32)

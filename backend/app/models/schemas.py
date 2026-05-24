@@ -5,18 +5,25 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 
+# Request/response models for the API endpoints.
+# These control what the frontend sends and receives.
+
+
 class UploadResponse(BaseModel):
+    """Response sent back after a video upload."""
     video_id: str
     status: str = "processing"
     message: str = "Video upload accepted. Processing started."
 
 
 class SearchRequest(BaseModel):
+    """Body for the /api/search endpoint."""
     query: str
     top_k: int = Field(default=20, ge=1, le=100)
 
 
 class SearchResult(BaseModel):
+    """A single frame match from a search query."""
     id: str = ""
     video_id: str
     timestamp_seconds: float
@@ -29,6 +36,7 @@ class SearchResult(BaseModel):
 
 
 class VideoStatus(BaseModel):
+    """Current processing status for a video."""
     video_id: str
     status: str
     progress: float = 0.0
@@ -39,6 +47,7 @@ class VideoStatus(BaseModel):
 
 
 class VideoInfo(BaseModel):
+    """Summary info for the videos list endpoint."""
     video_id: str
     filename: str
     source: str

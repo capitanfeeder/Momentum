@@ -26,6 +26,7 @@ def _get_client() -> QdrantClient:
 
 
 def create_collection() -> None:
+    """Create the Qdrant collection if it doesn't already exist."""
     client = _get_client()
     collections = [c.name for c in client.get_collections().collections]
 
@@ -47,6 +48,11 @@ def upsert_frames(
     embeddings: list[list[float]],
     payloads: list[dict[str, Any]],
 ) -> int:
+    """Store frame vectors and metadata in Qdrant.
+
+    Uploads in batches of 100 to keep memory usage reasonable.
+    Returns the number of vectors that were indexed.
+    """
     client = _get_client()
 
     if len(embeddings) != len(payloads):
@@ -54,6 +60,7 @@ def upsert_frames(
 
     points = []
     for idx, (vec, payload) in enumerate(zip(embeddings, payloads)):
+        # deterministic id so we don't duplicate if we re-process a video
         point_id = hash(f"{video_id}:{idx}") & 0xFFFFFFFFFFFFFFFF
         points.append(
             PointStruct(
@@ -66,6 +73,7 @@ def upsert_frames(
             )
         )
 
+    # batch upserts to avoid overwhelming qdrant with huge videos
     batch_size = 100
     total_upserted = 0
     for i in range(0, len(points), batch_size):

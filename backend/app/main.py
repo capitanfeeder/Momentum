@@ -20,8 +20,10 @@ logger = logging.getLogger("momentum")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """Startup/shutdown lifecycle. Creates storage dirs and ensures Qdrant collection exists."""
     logger.info("=== MOMENTUM Backend Starting ===")
 
+    # make sure all storage folders are there before anything runs
     for d in [
         settings.UPLOADS_DIR,
         settings.FRAMES_DIR,
@@ -32,6 +34,7 @@ async def lifespan(app: FastAPI):
         d.mkdir(parents=True, exist_ok=True)
     logger.info("Storage directories ready at %s", settings.STORAGE_DIR)
 
+    # init the qdrant collection — if it's already there this is a no-op
     try:
         create_collection()
         logger.info("Qdrant collection ready")
@@ -50,6 +53,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# allow the frontend dev server to talk to the API
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -72,6 +76,7 @@ app.include_router(status.router)
 app.include_router(videos.router)
 app.include_router(delete.router)
 
+# serve generated files (frames, thumbnails, clips) as static assets
 app.mount(
     "/storage",
     StaticFiles(directory=str(settings.STORAGE_DIR)),

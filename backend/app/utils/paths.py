@@ -32,6 +32,7 @@ def get_frame_path(video_id: str, frame_idx: int) -> Path:
 
 
 def ensure_directories(video_id: str) -> dict[str, Path]:
+    """Create all the per-video subdirectories if they don't exist."""
     dirs = {
         "frames": get_frames_dir(video_id),
         "thumbnails": get_thumbnails_dir(video_id),

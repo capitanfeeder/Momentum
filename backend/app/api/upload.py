@@ -16,6 +16,8 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api", tags=["upload"])
 
+# add more formats here if needed — these go through opencv so anything
+# opencv can open should work
 ALLOWED_EXTENSIONS = {".mp4", ".mov", ".mkv", ".avi", ".webm"}
 
 
@@ -24,9 +26,15 @@ async def upload_video(
     file: UploadFile,
     background_tasks: BackgroundTasks,
 ) -> UploadResponse:
+    """Accept a video file and kick off background processing.
+
+    The video gets a UUID, saved to disk, and then processed asynchronously.
+    The frontend polls /api/status/{video_id} to track progress.
+    """
     if not file.filename:
         raise HTTPException(status_code=400, detail="No filename provided")
 
+    # check file extension
     suffix = Path(file.filename).suffix.lower()
     if suffix not in ALLOWED_EXTENSIONS:
         raise HTTPException(
@@ -37,6 +45,7 @@ async def upload_video(
     video_id = str(uuid.uuid4())
     ensure_directories(video_id)
 
+    # save the upload to backend/storage/uploads/{video_id}/
     upload_dir = settings.UPLOADS_DIR / video_id
     upload_dir.mkdir(parents=True, exist_ok=True)
     save_path = upload_dir / f"video{suffix}"
@@ -54,6 +63,7 @@ async def upload_video(
         file.filename, file_size_mb, video_id,
     )
 
+    # fire off processing in the background so the API stays responsive
     background_tasks.add_task(process_video, video_id, save_path, "upload")
 
     return UploadResponse(

@@ -39,12 +39,19 @@ def _read_status(video_id: str) -> dict | None:
 
 
 async def process_video(video_id: str, video_path: Path, source: str = "upload") -> None:
+    """Main processing pipeline for a video.
+
+    Runs the whole thing: extract frames, detect objects, generate embeddings,
+    and index everything in Qdrant. Updates status.json as it goes so the
+    frontend can show progress in real time.
+    """
     start = time.monotonic()
     video_path = Path(video_path)
     video_id = str(video_id)
 
     ensure_directories(video_id)
 
+    # set up initial status so the frontend knows we started
     status = {
         "video_id": video_id,
         "status": "processing",
@@ -60,6 +67,7 @@ async def process_video(video_id: str, video_path: Path, source: str = "upload")
     _write_status(video_id, status)
 
     try:
+        # step 1: pull frames from the video
         status["current_step"] = "Extracting frames"
         status["progress"] = 5.0
         _write_status(video_id, status)
@@ -74,6 +82,7 @@ async def process_video(video_id: str, video_path: Path, source: str = "upload")
         if not frames:
             raise RuntimeError("No frames extracted from video")
 
+        # step 2: run yolo object detection on each frame
         status["current_step"] = "Detecting objects"
         status["progress"] = 30.0
         _write_status(video_id, status)
@@ -84,6 +93,7 @@ async def process_video(video_id: str, video_path: Path, source: str = "upload")
         status["progress"] = 60.0
         _write_status(video_id, status)
 
+        # step 3: encode frames into vectors with openclip
         status["current_step"] = "Generating embeddings"
         _write_status(video_id, status)
 
@@ -96,6 +106,7 @@ async def process_video(video_id: str, video_path: Path, source: str = "upload")
         status["progress"] = 85.0
         _write_status(video_id, status)
 
+        # step 4: push vectors + metadata into qdrant
         status["current_step"] = "Indexing in Qdrant"
         _write_status(video_id, status)
 
@@ -137,6 +148,11 @@ async def process_video(video_id: str, video_path: Path, source: str = "upload")
 
 
 def _detect_objects_batch(frames: list[dict], video_id: str) -> list[list[str]]:
+    """Run YOLOv8 object detection on every frame.
+
+    Returns a list of label sets, one per frame. Falls back gracefully
+    if ultralytics isn't installed or something goes wrong.
+    """
     results_per_frame: list[list[str]] = []
 
     try:
