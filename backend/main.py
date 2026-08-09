@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -9,6 +10,11 @@ from fastapi.staticfiles import StaticFiles
 
 from src.config import settings
 from src.indexing.qdrant_indexer import create_collection
+
+try:
+    from qdrant_client.http.exceptions import ResponseHandlingException
+except ImportError:
+    ResponseHandlingException = Exception  # type: ignore[assignment,misc]
 
 logging.basicConfig(
     level=logging.INFO,
@@ -35,8 +41,17 @@ async def lifespan(_: FastAPI):
     try:
         create_collection()
         logger.info("Qdrant collection ready")
-    except (ConnectionError, OSError) as e:
-        logger.warning("Could not connect to Qdrant: %s", e)
+    except (ConnectionError, ResponseHandlingException) as e:
+        cause = e.__cause__ or e
+        if "Connection refused" in str(cause):
+            logger.error(
+                "Cannot connect to Qdrant at %s. "
+                "Start it with: docker compose up -d",
+                settings.QDRANT_URL,
+            )
+        else:
+            logger.error("Qdrant error: %s", e)
+        os._exit(1)
 
     yield
 

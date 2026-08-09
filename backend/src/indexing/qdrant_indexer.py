@@ -25,13 +25,13 @@ def _get_client() -> QdrantClient:
     global _client
     if _client is None:
         _client = QdrantClient(url=settings.QDRANT_URL)
-        logger.info("Connected to Qdrant at %s", settings.QDRANT_URL)
     return _client
 
 
 def create_collection() -> None:
     client = _get_client()
     collections = [c.name for c in client.get_collections().collections]
+    logger.info("Connected to Qdrant at %s", settings.QDRANT_URL)
 
     if settings.COLLECTION_NAME not in collections:
         client.create_collection(
