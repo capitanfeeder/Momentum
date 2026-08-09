@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from app.config import settings
+from src.config import settings
 
 
 def get_video_dir(video_id: str) -> Path:

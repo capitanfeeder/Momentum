@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 import shutil
 import uuid
@@ -7,12 +8,17 @@ from pathlib import Path
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, UploadFile
 
-from app.config import settings
-from app.models.schemas import UploadResponse
-from app.services.video_processor import process_video
-from app.utils.paths import ensure_directories, get_upload_path
+from src.config import settings
+from src.models.schemas import UploadResponse
+from src.services.video_processor import process_video
+from src.utils.paths import ensure_directories
 
 logger = logging.getLogger(__name__)
+
+
+def _save_file(path: Path, source) -> None:
+    with open(path, "wb") as f:
+        shutil.copyfileobj(source, f)
 
 router = APIRouter(prefix="/api", tags=["upload"])
 
@@ -51,9 +57,8 @@ async def upload_video(
     save_path = upload_dir / f"video{suffix}"
 
     try:
-        with open(save_path, "wb") as f:
-            shutil.copyfileobj(file.file, f)
-    except Exception as e:
+        await asyncio.to_thread(_save_file, save_path, file.file)
+    except OSError as e:
         logger.exception("Failed to save uploaded file")
         raise HTTPException(status_code=500, detail=f"Failed to save file: {e}")
 

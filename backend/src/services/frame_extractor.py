@@ -4,9 +4,8 @@ import logging
 from pathlib import Path
 
 import cv2
-import numpy as np
 
-from app.config import settings
+from src.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -16,17 +15,11 @@ def extract_frames(
     video_id: str,
     frame_interval: int | None = None,
 ) -> list[dict]:
-    """Pull frames out of a video at regular intervals.
-
-    Saves full-size frames (224x224 for the encoder) and smaller
-    thumbnails (320px tall) for the frontend. Returns a list of dicts
-    with paths and timestamps for each extracted frame.
-    """
     interval = frame_interval or settings.FRAME_INTERVAL
     video_path = Path(video_path)
     video_id_str = str(video_id)
 
-    from app.utils.paths import get_frames_dir, get_thumbnails_dir
+    from src.utils.paths import get_frames_dir, get_thumbnails_dir
 
     frames_dir = get_frames_dir(video_id_str)
     thumbs_dir = get_thumbnails_dir(video_id_str)
@@ -45,10 +38,7 @@ def extract_frames(
         video_path.name, fps, total_frames_vid, duration,
     )
 
-    # figure out how many frames to skip based on the desired interval
-    frame_step = int(fps * interval) if fps > 0 else int(30 * interval)
-    if frame_step < 1:
-        frame_step = 1
+    frame_step = max(int(fps * interval) if fps > 0 else int(30 * interval), 1)
 
     extracted: list[dict] = []
     frame_idx = 0
@@ -60,7 +50,6 @@ def extract_frames(
 
         current_frame_num = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
 
-        # only save every Nth frame based on the interval
         if current_frame_num % frame_step == 0:
             timestamp = current_frame_num / fps if fps > 0 else 0.0
 
@@ -70,11 +59,9 @@ def extract_frames(
             frame_file = frames_dir / frame_filename
             thumb_file = thumbs_dir / thumb_filename
 
-            # full-size frame for the encoder (224x224)
             resized = cv2.resize(frame, settings.FRAME_SIZE, interpolation=cv2.INTER_AREA)
             cv2.imwrite(str(frame_file), resized, [cv2.IMWRITE_JPEG_QUALITY, 90])
 
-            # smaller thumbnail for the frontend preview
             thumb_h = 320
             h, w = frame.shape[:2]
             thumb_w = int(w * (thumb_h / h)) if h > 0 else 640

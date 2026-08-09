@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Any
 
 import numpy as np
 import torch
@@ -10,8 +10,8 @@ from PIL import Image
 
 logger = logging.getLogger(__name__)
 
-_model = None
-_tokenizer = None
+_model: Any = None
+_tokenizer: Any = None
 
 
 def _get_device() -> str:
@@ -28,7 +28,7 @@ def _load_model():
 
     import open_clip
 
-    from app.config import settings
+    from src.config import settings
 
     device = _get_device()
     logger.info(
@@ -38,7 +38,7 @@ def _load_model():
         device,
     )
 
-    model, _, preprocess = open_clip.create_model_and_transforms(
+    model, _, _preprocess = open_clip.create_model_and_transforms(
         settings.EMBEDDING_MODEL,
         pretrained=settings.EMBEDDING_PRETRAIN,
         device=device,
@@ -50,8 +50,7 @@ def _load_model():
     return _model, _tokenizer
 
 
-def encode_image(image_path: Path | str, device: Optional[str] = None) -> np.ndarray:
-    """Turn an image frame into a CLIP vector."""
+def encode_image(image_path: Path | str, device: str | None = None) -> np.ndarray:
     model, _ = _load_model()
     device = device or _get_device()
 
@@ -60,14 +59,12 @@ def encode_image(image_path: Path | str, device: Optional[str] = None) -> np.nda
 
     with torch.no_grad():
         features = model.encode_image(img_tensor)
-        # normalize so cosine similarity works properly
         features = features / features.norm(dim=-1, keepdim=True)
 
     return features.cpu().numpy().flatten().astype(np.float32)
 
 
-def encode_text(text: str, device: Optional[str] = None) -> np.ndarray:
-    """Turn a text query into a CLIP vector."""
+def encode_text(text: str, device: str | None = None) -> np.ndarray:
     model, tokenizer = _load_model()
     device = device or _get_device()
 
@@ -75,14 +72,13 @@ def encode_text(text: str, device: Optional[str] = None) -> np.ndarray:
 
     with torch.no_grad():
         features = model.encode_text(tokens)
-        # normalize so cosine similarity works properly
         features = features / features.norm(dim=-1, keepdim=True)
 
     return features.cpu().numpy().flatten().astype(np.float32)
 
 
 def encode_images_batch(
-    image_paths: list[Path | str], batch_size: int = 32, device: Optional[str] = None
+    image_paths: list[Path | str], batch_size: int = 32, device: str | None = None
 ) -> list[np.ndarray]:
     model, _ = _load_model()
     device = device or _get_device()
@@ -110,7 +106,7 @@ def encode_images_batch(
     return all_embeddings
 
 
-def _preprocess_image(img: Image.Image):
+def _preprocess_image(img: Image.Image) -> Any:
     from torchvision import transforms
 
     transform = transforms.Compose(

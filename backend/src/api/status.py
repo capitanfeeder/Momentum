@@ -4,8 +4,8 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from app.models.schemas import VideoStatus
-from app.services.video_processor import get_video_status
+from src.models.schemas import VideoStatus
+from src.services.video_processor import get_video_status
 
 logger = logging.getLogger(__name__)
 

@@ -4,8 +4,8 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from app.models.schemas import SearchRequest
-from app.search.semantic_search import search
+from src.models.schemas import SearchRequest
+from src.search.semantic_search import search
 
 logger = logging.getLogger(__name__)
 

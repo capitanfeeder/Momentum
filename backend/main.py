@@ -7,8 +7,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from app.config import settings
-from app.indexing.qdrant_indexer import create_collection
+from src.config import settings
+from src.indexing.qdrant_indexer import create_collection
 
 logging.basicConfig(
     level=logging.INFO,
@@ -19,11 +19,9 @@ logger = logging.getLogger("momentum")
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Startup/shutdown lifecycle. Creates storage dirs and ensures Qdrant collection exists."""
+async def lifespan(_: FastAPI):
     logger.info("=== MOMENTUM Backend Starting ===")
 
-    # make sure all storage folders are there before anything runs
     for d in [
         settings.UPLOADS_DIR,
         settings.FRAMES_DIR,
@@ -34,11 +32,10 @@ async def lifespan(app: FastAPI):
         d.mkdir(parents=True, exist_ok=True)
     logger.info("Storage directories ready at %s", settings.STORAGE_DIR)
 
-    # init the qdrant collection — if it's already there this is a no-op
     try:
         create_collection()
         logger.info("Qdrant collection ready")
-    except Exception as e:
+    except (ConnectionError, OSError) as e:
         logger.warning("Could not connect to Qdrant: %s", e)
 
     yield
@@ -53,7 +50,6 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# allow the frontend dev server to talk to the API
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -68,7 +64,7 @@ app.add_middleware(
 )
 
 
-from app.api import upload, search, status, videos, delete
+from src.api import delete, search, status, upload, videos
 
 app.include_router(upload.router)
 app.include_router(search.router)
@@ -76,7 +72,8 @@ app.include_router(status.router)
 app.include_router(videos.router)
 app.include_router(delete.router)
 
-# serve generated files (frames, thumbnails, clips) as static assets
+settings.STORAGE_DIR.mkdir(parents=True, exist_ok=True)
+
 app.mount(
     "/storage",
     StaticFiles(directory=str(settings.STORAGE_DIR)),
@@ -97,3 +94,8 @@ async def root():
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
