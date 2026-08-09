@@ -5,8 +5,6 @@ from pathlib import Path
 
 import cv2
 
-from app.config import settings
-
 logger = logging.getLogger(__name__)
 
 
@@ -18,7 +16,7 @@ def extract_clip_thumbnail(
 ) -> str | None:
     video_path = Path(video_path)
 
-    from app.utils.paths import get_clips_dir
+    from src.utils.paths import get_clips_dir
 
     clips_dir = get_clips_dir(video_id)
     clips_dir.mkdir(parents=True, exist_ok=True)

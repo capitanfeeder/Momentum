@@ -6,11 +6,15 @@ from typing import Any
 from qdrant_client import QdrantClient
 from qdrant_client.models import (
     Distance,
+    FieldCondition,
+    Filter,
+    MatchValue,
+    PointIdsList,
     PointStruct,
     VectorParams,
 )
 
-from app.config import settings
+from src.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -125,14 +129,14 @@ def count_video_vectors(video_id: str) -> int:
     client = _get_client()
     results = client.scroll(
         collection_name=settings.COLLECTION_NAME,
-        scroll_filter={
-            "must": [
-                {
-                    "key": "video_id",
-                    "match": {"value": video_id},
-                }
+        scroll_filter=Filter(
+            must=[
+                FieldCondition(
+                    key="video_id",
+                    match=MatchValue(value=video_id),
+                )
             ]
-        },
+        ),
         limit=10000,
         with_payload=False,
         with_vectors=False,
@@ -145,14 +149,14 @@ def delete_video_vectors(video_id: str) -> int:
 
     results = client.scroll(
         collection_name=settings.COLLECTION_NAME,
-        scroll_filter={
-            "must": [
-                {
-                    "key": "video_id",
-                    "match": {"value": video_id},
-                }
+        scroll_filter=Filter(
+            must=[
+                FieldCondition(
+                    key="video_id",
+                    match=MatchValue(value=video_id),
+                )
             ]
-        },
+        ),
         limit=10000,
         with_payload=False,
         with_vectors=False,
@@ -163,7 +167,7 @@ def delete_video_vectors(video_id: str) -> int:
     if point_ids:
         client.delete(
             collection_name=settings.COLLECTION_NAME,
-            points_selector=point_ids,
+            points_selector=PointIdsList(points=point_ids),
         )
         logger.info("Deleted %d vectors for video '%s'", len(point_ids), video_id)
 
@@ -191,7 +195,7 @@ def delete_all_vectors() -> int:
     if all_ids:
         client.delete(
             collection_name=settings.COLLECTION_NAME,
-            points_selector=all_ids,
+            points_selector=PointIdsList(points=all_ids),
         )
         logger.info("Deleted ALL %d vectors from collection", len(all_ids))
 

@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import logging
-from pathlib import Path
 
-from app.config import settings
-from app.embeddings.clip_encoder import encode_text
-from app.indexing.qdrant_indexer import search_vectors
-from app.models.schemas import SearchResult
+from src.config import settings
+from src.embeddings.clip_encoder import encode_text
+from src.indexing.qdrant_indexer import search_vectors
+from src.models.schemas import SearchResult
 
 logger = logging.getLogger(__name__)
 

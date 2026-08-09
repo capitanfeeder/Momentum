@@ -7,17 +7,13 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-import numpy as np
-
-from app.config import settings
-from app.embeddings.clip_encoder import encode_images_batch
-from app.indexing.qdrant_indexer import create_collection, upsert_frames
-from app.services.clip_generator import extract_clip_thumbnail
-from app.services.frame_extractor import extract_frames
-from app.utils.paths import (
-    get_metadata_path,
-    get_upload_path,
+from src.config import settings
+from src.embeddings.clip_encoder import encode_images_batch
+from src.indexing.qdrant_indexer import create_collection, upsert_frames
+from src.services.frame_extractor import extract_frames
+from src.utils.paths import (
     ensure_directories,
+    get_metadata_path,
 )
 
 logger = logging.getLogger(__name__)
@@ -128,7 +124,7 @@ async def process_video(video_id: str, video_path: Path, source: str = "upload")
             video_id, len(frames), indexed_count, elapsed,
         )
 
-    except Exception as e:
+    except (RuntimeError, OSError, ValueError) as e:
         logger.exception("Processing failed for video %s", video_id)
         status["status"] = "failed"
         status["error"] = str(e)
@@ -172,7 +168,7 @@ def _detect_objects_batch(frames: list[dict], video_id: str) -> list[list[str]]:
     except ImportError:
         logger.warning("ultralytics not installed, skipping object detection")
         results_per_frame = [[] for _ in frames]
-    except Exception as e:
+    except (RuntimeError, OSError, ValueError, TypeError) as e:
         logger.warning("Object detection failed: %s", e)
         results_per_frame = [[] for _ in frames]
 

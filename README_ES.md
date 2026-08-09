@@ -49,24 +49,24 @@ No es un chatbot. No es RAG. Es busqueda vectorial aplicada a contenido de video
 - Python 3.12+
 - Node.js 18+ y pnpm
 - GPU NVIDIA con CUDA (recomendado, funciona en CPU como alternativa)
-- Binario de Qdrant ([descargar aca](https://github.com/qdrant/qdrant/releases))
+- Docker (para Qdrant)
 
 ### Backend
 
 ```bash
 cd backend
 python -m venv venv
-venv\Scripts\activate          # Windows
-# source venv/bin/activate    # Linux/Mac
+source venv/bin/activate       # Linux/Mac
+# venv\Scripts\activate        # Windows
 
 pip install -r requirements.txt
 pip install "numpy==1.26.4"    # arreglar compatibilidad de numpy
 
-# Arrancar Qdrant (terminal aparte)
-qdrant.exe
+# Arrancar Qdrant (desde la raiz del proyecto)
+docker compose up -d
 
 # Arrancar backend
-uvicorn app.main:app --reload --port 8000
+python main.py
 ```
 
 ### Frontend
@@ -97,9 +97,10 @@ El codigo detecta automaticamente si hay CUDA disponible y usa CPU si no lo encu
 
 ```
 momentum/
+├── docker-compose.yml           # Contenedor Qdrant
 ├── backend/
-│   ├── app/
-│   │   ├── main.py              # Punto de entrada FastAPI
+│   ├── main.py                  # Punto de entrada FastAPI
+│   ├── src/
 │   │   ├── config.py            # Configuracion y rutas
 │   │   ├── api/                 # Endpoints de la API
 │   │   ├── services/            # Pipeline de procesamiento de video

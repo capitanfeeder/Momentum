@@ -5,9 +5,9 @@ import shutil
 
 from fastapi import APIRouter
 
-from app.config import settings
-from app.indexing.qdrant_indexer import delete_all_vectors
-from app.services.video_processor import list_all_videos
+from src.config import settings
+from src.indexing.qdrant_indexer import delete_all_vectors
+from src.services.video_processor import list_all_videos
 
 logger = logging.getLogger(__name__)
 

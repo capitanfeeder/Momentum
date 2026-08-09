@@ -7,8 +7,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from app.config import settings
-from app.indexing.qdrant_indexer import create_collection
+from src.config import settings
+from src.indexing.qdrant_indexer import create_collection
 
 logging.basicConfig(
     level=logging.INFO,
@@ -19,7 +19,7 @@ logger = logging.getLogger("momentum")
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_: FastAPI):
     logger.info("=== MOMENTUM Backend Starting ===")
 
     for d in [
@@ -35,7 +35,7 @@ async def lifespan(app: FastAPI):
     try:
         create_collection()
         logger.info("Qdrant collection ready")
-    except Exception as e:
+    except (ConnectionError, OSError) as e:
         logger.warning("Could not connect to Qdrant: %s", e)
 
     yield
@@ -64,13 +64,15 @@ app.add_middleware(
 )
 
 
-from app.api import upload, search, status, videos, delete
+from src.api import delete, search, status, upload, videos
 
 app.include_router(upload.router)
 app.include_router(search.router)
 app.include_router(status.router)
 app.include_router(videos.router)
 app.include_router(delete.router)
+
+settings.STORAGE_DIR.mkdir(parents=True, exist_ok=True)
 
 app.mount(
     "/storage",
@@ -92,3 +94,8 @@ async def root():
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)

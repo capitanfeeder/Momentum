@@ -4,8 +4,8 @@ import logging
 
 from fastapi import APIRouter
 
-from app.models.schemas import VideoInfo
-from app.services.video_processor import list_all_videos
+from src.models.schemas import VideoInfo
+from src.services.video_processor import list_all_videos
 
 logger = logging.getLogger(__name__)
 

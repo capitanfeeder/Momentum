@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
-
 from pydantic import BaseModel, Field
 
 
@@ -25,7 +23,7 @@ class SearchResult(BaseModel):
     frame_path: str
     thumbnail_path: str
     objects: list[str] = []
-    clip_path: Optional[str] = None
+    clip_path: str | None = None
 
 
 class VideoStatus(BaseModel):
@@ -35,7 +33,7 @@ class VideoStatus(BaseModel):
     current_step: str = ""
     total_frames: int = 0
     processed_frames: int = 0
-    error: Optional[str] = None
+    error: str | None = None
 
 
 class VideoInfo(BaseModel):
@@ -47,4 +45,4 @@ class VideoInfo(BaseModel):
     indexed_vectors: int = 0
     duration_seconds: float = 0.0
     created_at: str
-    thumbnail_path: Optional[str] = None
+    thumbnail_path: str | None = None

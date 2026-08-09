@@ -4,9 +4,8 @@ import logging
 from pathlib import Path
 
 import cv2
-import numpy as np
 
-from app.config import settings
+from src.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +19,7 @@ def extract_frames(
     video_path = Path(video_path)
     video_id_str = str(video_id)
 
-    from app.utils.paths import get_frames_dir, get_thumbnails_dir
+    from src.utils.paths import get_frames_dir, get_thumbnails_dir
 
     frames_dir = get_frames_dir(video_id_str)
     thumbs_dir = get_thumbnails_dir(video_id_str)
@@ -39,9 +38,7 @@ def extract_frames(
         video_path.name, fps, total_frames_vid, duration,
     )
 
-    frame_step = int(fps * interval) if fps > 0 else int(30 * interval)
-    if frame_step < 1:
-        frame_step = 1
+    frame_step = max(int(fps * interval) if fps > 0 else int(30 * interval), 1)
 
     extracted: list[dict] = []
     frame_idx = 0
