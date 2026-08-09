@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLanguage } from "../i18n/LanguageContext";
 
 interface UploadZoneProps {
   onUpload: (file: File) => Promise<void>;
@@ -19,15 +20,16 @@ export default function UploadZone({
   const [error, setError] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { t } = useLanguage();
 
   const validateFile = (file: File): boolean => {
     const ext = "." + file.name.split(".").pop()?.toLowerCase();
     if (!ACCEPTED_TYPES.includes(file.type) && !ACCEPTED_EXTENSIONS.includes(ext)) {
-      setError("Unsupported format. Use .mp4, .mov, or .mkv");
+      setError(t("upload.errorFormat"));
       return false;
     }
     if (file.size > 2 * 1024 * 1024 * 1024) {
-      setError("File too large. Maximum size is 2GB");
+      setError(t("upload.errorSize"));
       return false;
     }
     setError(null);
@@ -43,7 +45,7 @@ export default function UploadZone({
         await onUpload(file);
       } catch (err) {
         console.error('[UploadZone] Upload failed:', err);
-        setError(err instanceof Error ? err.message : "Upload failed. Check if the backend is running.");
+        setError(err instanceof Error ? err.message : t("upload.errorFailed"));
         setFileName(null);
       }
     },
@@ -138,7 +140,7 @@ export default function UploadZone({
                 {fileName}
               </p>
             )}
-            <p className="text-xs text-slate-500 font-mono">Uploading...</p>
+            <p className="text-xs text-slate-500 font-mono">{t("upload.uploading")}</p>
           </motion.div>
         ) : (
           <motion.div
@@ -200,16 +202,16 @@ export default function UploadZone({
 
             <p className="text-sm text-slate-400 mb-1">
               {isDragOver ? (
-                <span className="text-accent">Drop here</span>
+                <span className="text-accent">{t("upload.dropHere")}</span>
               ) : (
                 <>
-                  <span className="text-accent font-medium">Click to browse</span>{" "}
-                  or drag & drop
+                  <span className="text-accent font-medium">{t("upload.clickToBrowse")}</span>{" "}
+                  {t("upload.dragDrop")}
                 </>
               )}
             </p>
             <p className="text-xs text-slate-600 font-mono">
-              MP4, MOV, MKV — Max 2GB
+              {t("upload.formats")}
             </p>
           </motion.div>
         )}

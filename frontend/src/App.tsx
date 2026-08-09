@@ -5,8 +5,9 @@ import ProcessingView from "./components/ProcessingView";
 import SearchView from "./components/SearchView";
 import VideoModal from "./components/VideoModal";
 import { useVideoSearch } from "./hooks/useVideoSearch";
+import { LanguageProvider } from "./i18n/LanguageContext";
 
-function App() {
+function AppContent() {
   const {
     screen,
     results,
@@ -95,4 +96,10 @@ function App() {
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <LanguageProvider>
+      <AppContent />
+    </LanguageProvider>
+  );
+}

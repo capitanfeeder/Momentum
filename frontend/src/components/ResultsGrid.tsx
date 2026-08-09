@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import ResultCard from "./ResultCard";
+import { useLanguage } from "../i18n/LanguageContext";
 import type { SearchResult } from "../types";
 
 interface ResultsGridProps {
@@ -8,6 +9,7 @@ interface ResultsGridProps {
 }
 
 export default function ResultsGrid({ results, onSelectResult }: ResultsGridProps) {
+  const { t } = useLanguage();
   if (results.length === 0) return null;
 
   return (
@@ -22,10 +24,10 @@ export default function ResultsGrid({ results, onSelectResult }: ResultsGridProp
         <div className="flex items-center gap-3">
           <div className="w-1 h-6 rounded-full bg-accent" />
           <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
-            Found Moments
+            {t("results.foundMoments")}
           </h3>
           <span className="text-xs font-mono text-slate-500 px-2 py-0.5 rounded-md bg-surface-50/30 border border-slate-700/30">
-            {results.length} results
+            {results.length} {t("results.count")}
           </span>
         </div>
       </motion.div>

@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useLanguage } from "../i18n/LanguageContext";
 import type { SearchResult } from "../types";
 
 interface ResultCardProps {
@@ -8,6 +9,7 @@ interface ResultCardProps {
 }
 
 export default function ResultCard({ result, index, onClick }: ResultCardProps) {
+  const { t } = useLanguage();
   const scorePercent = Math.round(result.score * 100);
 
   return (
@@ -92,7 +94,7 @@ export default function ResultCard({ result, index, onClick }: ResultCardProps) 
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
             </svg>
-            View Moment
+            {t("result.viewMoment")}
           </span>
         </div>
       </div>

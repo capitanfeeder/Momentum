@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import SearchBar from "./SearchBar";
 import ResultsGrid from "./ResultsGrid";
+import { useLanguage } from "../i18n/LanguageContext";
 import type { SearchResult } from "../types";
 
 interface SearchViewProps {
@@ -22,6 +23,7 @@ export default function SearchView({
   onSearch,
   onSelectResult,
 }: SearchViewProps) {
+  const { t } = useLanguage();
   return (
     <div className="py-8">
       <motion.div
@@ -68,7 +70,7 @@ export default function SearchView({
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
             </svg>
           </motion.div>
-          <p className="text-sm text-slate-400 font-mono">Searching semantic space...</p>
+          <p className="text-sm text-slate-400 font-mono">{t("search.searchingSemantic")}</p>
         </motion.div>
       )}
 
@@ -89,10 +91,10 @@ export default function SearchView({
             </svg>
           </div>
           <h3 className="text-lg font-semibold text-slate-400 mb-2">
-            Ready to Search
+            {t("search.readyTitle")}
           </h3>
           <p className="text-sm text-slate-500 text-center max-w-md">
-            Type a natural language query to find specific moments in your video.
+            {t("search.readyDescription")}
           </p>
         </motion.div>
       )}
@@ -107,10 +109,10 @@ export default function SearchView({
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
           </svg>
           <h3 className="text-lg font-semibold text-slate-400 mb-2">
-            No moments found
+            {t("search.noResultsTitle")}
           </h3>
           <p className="text-sm text-slate-500">
-            Try a different search query.
+            {t("search.noResultsDescription")}
           </p>
         </motion.div>
       )}

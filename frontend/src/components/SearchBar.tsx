@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useLanguage } from "../i18n/LanguageContext";
 
 interface SearchBarProps {
   query: string;
@@ -18,6 +19,7 @@ export default function SearchBar({
 }: SearchBarProps) {
   const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (!compact) {
@@ -81,8 +83,8 @@ export default function SearchBar({
             onBlur={() => setFocused(false)}
             placeholder={
               compact
-                ? "Search again..."
-                : "Find any moment in any video..."
+                ? t("search.placeholderCompact")
+                : t("search.placeholder")
             }
             disabled={searching}
             className={`
@@ -147,7 +149,7 @@ export default function SearchBar({
                 </svg>
               )}
               <span className="hidden sm:inline">
-                {searching ? "Searching..." : "Search"}
+                {searching ? t("search.searching") : t("search.button")}
               </span>
             </button>
           </div>
@@ -161,7 +163,7 @@ export default function SearchBar({
             <kbd className="px-1.5 py-0.5 rounded bg-surface-50/30 border border-slate-700/30 text-slate-500">
               Enter
             </kbd>
-            to search
+            {t("search.hint")}
           </p>
         </div>
       )}
